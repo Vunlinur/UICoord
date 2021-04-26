@@ -4,6 +4,8 @@ from tkinter import simpledialog
 
 from PIL import ImageTk, Image
 
+from CoordList import Coord
+
 
 class Workspace(Canvas):
     def __init__(self, parent: Tk, *args, **kwargs):
@@ -28,7 +30,8 @@ class Workspace(Canvas):
         self.bind("<Button-3>", self.on_right_click)
         self.bind("<ButtonRelease-1>", self.on_click_release)
 
-        self.menu_insert_callback = None
+        self.add_coord_callback = None
+        self.get_coord_callback = None
         self.update_coords_label_callback = None
 
     def on_mouseover(self, event):
@@ -76,47 +79,47 @@ class Workspace(Canvas):
             + pow(self.last_coord[1] - event.y, 2)
         ).real
         if distance < 8:
-            coord = (name,
-                     event.x / self.image.size[0],
-                     event.y / self.image.size[1]
+            coord = Coord(name=name,
+                          x1=event.x / self.image.size[0],
+                          y1=event.y / self.image.size[1]
             )
         else:
-            coord = (name,
-                     self.last_coord[0] / self.image.size[0],
-                     self.last_coord[1] / self.image.size[1],
-                     event.x / self.image.size[0],
-                     event.y / self.image.size[1]
+            coord = Coord(name=name,
+                          x1=self.last_coord[0] / self.image.size[0],
+                          y1=self.last_coord[1] / self.image.size[1],
+                          x2=event.x / self.image.size[0],
+                          y2=event.y / self.image.size[1]
             )
 
-        self.menu_insert_callback(coord)
+        self.add_coord_callback(coord)
         self.clear_marker()
         self.last_coord = (0, 0)
 
-    def paint_marker_from_list(self, values):
+    def paint_marker_from_list(self, index):
         self.clear_marker()
-        if type(values) == str:
+        if index == -1:
             return
 
         kwargs = {
             "outline": "red",
             "width": 2
         }
-        coords = values[1:]
-        if len(coords) == 4:
+        coord = self.get_coord_callback(index)
+        if coord.type == coord.RECTANGLE:
             self.marker = self.create_rectangle(
-                float(coords[0]) * self.image.size[0],
-                float(coords[1]) * self.image.size[1],
-                float(coords[2]) * self.image.size[0],
-                float(coords[3]) * self.image.size[1],
+                coord.x1 * self.image.size[0],
+                coord.y1 * self.image.size[1],
+                coord.x2 * self.image.size[0],
+                coord.y2 * self.image.size[1],
                 kwargs
             )
         else:
             radius = 3
             self.marker = self.create_oval(
-                float(coords[0]) * self.image.size[0] - radius,
-                float(coords[1]) * self.image.size[1] - radius,
-                float(coords[0]) * self.image.size[0] + radius,
-                float(coords[1]) * self.image.size[1] + radius,
+                coord.x1 * self.image.size[0] - radius,
+                coord.y1 * self.image.size[1] - radius,
+                coord.x1 * self.image.size[0] + radius,
+                coord.y1 * self.image.size[1] + radius,
                 kwargs, fill="red"
             )
 
