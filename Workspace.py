@@ -43,7 +43,7 @@ class Workspace(Canvas):
 
     def paint_marker_from_workspace(self, event):
         if self.last_coord != (0, 0):
-            self.clear_marker()
+            self.delete(self.marker)
             self.marker = self.create_rectangle(self.last_coord[0], self.last_coord[1], event.x,
                                                        event.y, outline="red", width=2)
 
@@ -63,7 +63,6 @@ class Workspace(Canvas):
 
     def on_right_click(self, event):
         self.clear_marker()
-        self.last_coord = (0, 0)
 
     def on_click_release(self, event):
         """
@@ -73,7 +72,14 @@ class Workspace(Canvas):
             # return when operation was cancelled by right-click
             return
 
-        name = simpledialog.askstring("Name", "Enter the name of the coord:", parent=self.parent) or "Unnamed"
+        name = simpledialog.askstring("Name", "Enter the name of the coord:", parent=self.parent)
+        if name is None:
+            self.clear_marker()
+            return
+
+        if name == "":
+            name = name or "Unnamed"
+
         distance = sqrt(
             pow(self.last_coord[0] - event.x, 2)
             + pow(self.last_coord[1] - event.y, 2)
@@ -93,7 +99,6 @@ class Workspace(Canvas):
 
         self.add_coord_callback(coord)
         self.clear_marker()
-        self.last_coord = (0, 0)
 
     def paint_marker_from_list(self, index):
         self.clear_marker()
@@ -124,4 +129,5 @@ class Workspace(Canvas):
             )
 
     def clear_marker(self):
+        self.last_coord = (0, 0)
         self.delete(self.marker)
