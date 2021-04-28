@@ -1,7 +1,7 @@
 from tkinter import *
 
 from CoordList import CoordList
-from Menu import Menu as CoordMenu
+from CoordMenu import CoordMenu as CoordMenu
 from Workspace import Workspace
 
 
@@ -15,6 +15,21 @@ class MainApplication(Frame):
         self.workspace = Workspace(self.parent)
         self.coord_list_MVC = CoordList(self.parent)
 
+        self.menu_bar = Menu(self.parent)
+        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(label="New project", command=..., state="disabled")
+        self.file_menu.add_command(label="Open project", command=..., state="disabled")
+        self.file_menu.add_command(label="Save project", command=..., state="disabled")
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Generate text output", command=self.coord_list_MVC.format_and_copy)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+
+        self.help_menu = Menu(self.menu_bar, tearoff=0)
+        self.help_menu.add_command(label="Settings", command=..., state="disabled")
+        self.menu_bar.add_cascade(label="Settings", menu=self.help_menu)
+
+        self.parent.config(menu=self.menu_bar)
+
         # Callbacks
         self.workspace.add_coord_callback = self.coord_list_MVC.add_coord
         self.workspace.get_coord_callback = self.coord_list_MVC.get_coord
@@ -24,7 +39,6 @@ class MainApplication(Frame):
         self.coord_list_MVC.get_pattern_callback = self.menu.pattern.get
 
         self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
-        self.menu.export_button.bind('<Button-1>', self.coord_list_MVC.format_and_copy)
 
 
 if __name__ == "__main__":

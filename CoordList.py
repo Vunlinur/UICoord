@@ -41,7 +41,7 @@ class CoordList(list):
     def get_coord(self, index):
         return self[index]
 
-    def format_and_copy(self, _):
+    def format_and_copy(self):
         rows = linesep.join([self.get_pattern_callback().format(**coord.__dict__) for coord in self])
         self.widget.clipboard_clear()
         self.widget.clipboard_append(rows)

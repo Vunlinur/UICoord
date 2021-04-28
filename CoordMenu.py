@@ -4,7 +4,7 @@ from tkinter import ttk
 from CoordList import Coord
 
 
-class Menu(Frame):
+class CoordMenu(Frame):
     def __init__(self, parent: Tk, *args, **kwargs):
         Frame.__init__(self, parent, width=400, *args, **kwargs)
         self.parent = parent
@@ -52,9 +52,6 @@ class Menu(Frame):
 
         self.pattern_entry = Entry(self.export, textvariable=self.pattern)
         self.pattern_entry.pack(side=LEFT, fill=X, expand=Y)
-
-        self.export_button = Button(self.export, text="Copy to Clipboard")
-        self.export_button.pack(side=RIGHT)
 
         # Binds, callbacks
         self.tree.bind("<Motion>", self.on_list_mouseover)
