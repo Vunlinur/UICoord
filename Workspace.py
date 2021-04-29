@@ -9,9 +9,8 @@ from CoordList import Coord
 
 
 class Workspace(Canvas):
-    supported_filetypes = "*.apng *.blp *.bmp *.cur *.eps *.gif *.icb *.j2c *.j2k *.jp2 *.jpc *.jpe *.jpeg *.jpf " \
-                          "*.jpg *.jps *.jpx *.mpo  *.pcx *.pixar *.png *.pns *.psd *.pxr *.tga *.tif *.tiff *.vda " \
-                          "*.vst *.xbm"
+    supported_filetypes = ".apng .blp .bmp .cur .eps .gif .icb .j2c .j2k .jp2 .jpc .jpe .jpeg .jpf .jpg .jps .jpx " \
+                          ".mpo .pcx .pixar .png .pns .psd .pxr .tga .tif .tiff .vda .vst .xbm"
 
     def __init__(self, parent: Tk, *args, **kwargs):
         Canvas.__init__(self, parent, bd=0, *args, **kwargs)
@@ -25,6 +24,7 @@ class Workspace(Canvas):
         self.image = None
         self.photo_image = None
         self.image_aspect_ratio = 1.0
+        self.scale = 1.0
         self.last_coord = (0.0, 0.0)
         self.marker = self.create_rectangle(0, 0, 0, 0)
 
@@ -90,6 +90,12 @@ class Workspace(Canvas):
             scale = (int(height * self.image_aspect_ratio), height)
         else:
             scale = (width, int(width / self.image_aspect_ratio))
+
+        if scale == self.scale:
+            return
+        else:
+            self.scale = scale
+
         self.image = self.image_original.resize(scale)
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.create_image(0, 0, anchor=NW, image=self.photo_image)
