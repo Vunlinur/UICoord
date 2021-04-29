@@ -1,9 +1,9 @@
 from cmath import sqrt
 from os import getcwd
 from tkinter import *
-from tkinter import simpledialog, filedialog
+from tkinter import simpledialog, filedialog, messagebox
 
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageGrab
 
 from CoordList import Coord
 
@@ -39,8 +39,17 @@ class Workspace(Canvas):
         self.get_coord_callback = None
         self.update_coords_label_callback = None
 
-    def open_image(self, path):
-        self.image_original = Image.open(path)
+    def load_image_from_clipboard(self):
+        try:
+            self.load_image(ImageGrab.grabclipboard())
+        except AttributeError:
+            messagebox.showinfo(message="Clipboard is Empty.")
+
+    def load_image_from_file(self, path):
+        self.load_image(Image.open(path))
+
+    def load_image(self, image):
+        self.image_original = image
         self.image_aspect_ratio = self.image_original.size[0] / self.image_original.size[1]
         # Gently calls on_resize function to fit the picture to the workspace.
         # Calling on_resize manually here executes it before the workspace is created and fails with its width/height.
@@ -55,7 +64,7 @@ class Workspace(Canvas):
                                           initialdir=getcwd(),
                                           title="Please select a file:",
                                           filetypes=file_types)
-        self.open_image(path)
+        self.load_image_from_file(path)
 
     def on_mouseover(self, event):
         self.update_coords_label_callback(
