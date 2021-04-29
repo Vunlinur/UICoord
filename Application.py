@@ -21,6 +21,8 @@ class MainApplication(Frame):
         self.file_menu.add_command(label="Open project", command=..., state="disabled")
         self.file_menu.add_command(label="Save project", command=..., state="disabled")
         self.file_menu.add_separator()
+        self.file_menu.add_command(label="Open image", command=self.workspace.open_image_from_dialog)
+        self.file_menu.add_separator()
         self.file_menu.add_command(label="Generate text output", command=self.coord_list_MVC.format_and_copy)
         self.menu_bar.add_cascade(label="File", menu=self.file_menu)
 
@@ -29,6 +31,8 @@ class MainApplication(Frame):
         self.menu_bar.add_cascade(label="Settings", menu=self.help_menu)
 
         self.parent.config(menu=self.menu_bar)
+
+        self.workspace.open_image("uisample.png")
 
         # Callbacks
         self.workspace.add_coord_callback = self.coord_list_MVC.add_coord

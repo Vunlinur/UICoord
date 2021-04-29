@@ -1,6 +1,7 @@
 from cmath import sqrt
+from os import getcwd
 from tkinter import *
-from tkinter import simpledialog
+from tkinter import simpledialog, filedialog
 
 from PIL import ImageTk, Image
 
@@ -8,6 +9,10 @@ from CoordList import Coord
 
 
 class Workspace(Canvas):
+    supported_filetypes = "*.apng *.blp *.bmp *.cur *.eps *.gif *.icb *.j2c *.j2k *.jp2 *.jpc *.jpe *.jpeg *.jpf " \
+                          "*.jpg *.jps *.jpx *.mpo  *.pcx *.pixar *.png *.pns *.psd *.pxr *.tga *.tif *.tiff *.vda " \
+                          "*.vst *.xbm"
+
     def __init__(self, parent: Tk, *args, **kwargs):
         Canvas.__init__(self, parent, bd=0, *args, **kwargs)
         self.parent = parent
@@ -16,10 +21,10 @@ class Workspace(Canvas):
         self.pack(side=LEFT, fill=BOTH, expand=YES, padx=12, pady=12)
 
         #  Member variables
-        self.image_original = Image.open("uisample.png")
-        self.image = self.image_original
-        self.photo_image = None  # set in on_resize
-        self.image_aspect_ratio = self.image.size[0] / self.image.size[1]
+        self.image_original = None
+        self.image = None
+        self.photo_image = None
+        self.image_aspect_ratio = 1.0
         self.last_coord = (0.0, 0.0)
         self.marker = self.create_rectangle(0, 0, 0, 0)
 
@@ -34,6 +39,24 @@ class Workspace(Canvas):
         self.get_coord_callback = None
         self.update_coords_label_callback = None
 
+    def open_image(self, path):
+        self.image_original = Image.open(path)
+        self.image_aspect_ratio = self.image_original.size[0] / self.image_original.size[1]
+        # Gently calls on_resize function to fit the picture to the workspace.
+        # Calling on_resize manually here executes it before the workspace is created and fails with its width/height.
+        self.event_generate("<Configure>")
+
+    def open_image_from_dialog(self):
+        file_types = [
+            ('image files', self.supported_filetypes),
+            ('all files', '.*')
+        ]
+        path = filedialog.askopenfilename(parent=self,
+                                          initialdir=getcwd(),
+                                          title="Please select a file:",
+                                          filetypes=file_types)
+        self.open_image(path)
+
     def on_mouseover(self, event):
         self.update_coords_label_callback(
             event.x / self.image.size[0],
@@ -45,15 +68,19 @@ class Workspace(Canvas):
         if self.last_coord != (0, 0):
             self.delete(self.marker)
             self.marker = self.create_rectangle(self.last_coord[0], self.last_coord[1], event.x,
-                                                       event.y, outline="red", width=2)
+                                                event.y, outline="red", width=2)
 
     def on_resize(self, event):
         self.clear_marker()
-        workspace_aspect_ratio = event.width / event.height
+        self.winfo_width()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        workspace_aspect_ratio = width / height
+
         if self.image_aspect_ratio < workspace_aspect_ratio:
-            scale = (int(event.height * self.image_aspect_ratio), event.height)
+            scale = (int(height * self.image_aspect_ratio), height)
         else:
-            scale = (event.width, int(event.width / self.image_aspect_ratio))
+            scale = (width, int(width / self.image_aspect_ratio))
         self.image = self.image_original.resize(scale)
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.create_image(0, 0, anchor=NW, image=self.photo_image)
@@ -88,14 +115,14 @@ class Workspace(Canvas):
             coord = Coord(name=name,
                           x1=event.x / self.image.size[0],
                           y1=event.y / self.image.size[1]
-            )
+                          )
         else:
             coord = Coord(name=name,
                           x1=self.last_coord[0] / self.image.size[0],
                           y1=self.last_coord[1] / self.image.size[1],
                           x2=event.x / self.image.size[0],
                           y2=event.y / self.image.size[1]
-            )
+                          )
 
         self.add_coord_callback(coord)
         self.clear_marker()
