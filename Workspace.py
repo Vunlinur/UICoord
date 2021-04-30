@@ -91,7 +91,9 @@ class Workspace(Canvas):
         else:
             scale = (width, int(width / self.image_aspect_ratio))
 
-        if scale == self.scale:
+        # scale stays the same when loading same-resolution images so we have to check if the event has been called
+        # artificially via event_generate("<Configure>"), in this case all fields are 0
+        if scale == self.scale and event.x != 0 and event.y != 0:
             return
         else:
             self.scale = scale
@@ -119,8 +121,7 @@ class Workspace(Canvas):
             self.clear_marker()
             return
 
-        if name == "":
-            name = name or "Unnamed"
+        name = name or "Unnamed"
 
         distance = sqrt(
             pow(self.last_coord[0] - event.x, 2)
