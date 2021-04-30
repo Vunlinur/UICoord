@@ -3,7 +3,7 @@ from os import getcwd
 from tkinter import *
 from tkinter import simpledialog, filedialog, messagebox
 
-from PIL import ImageTk, Image, ImageGrab
+from PIL import ImageTk, Image, ImageGrab, UnidentifiedImageError
 
 from CoordList import Coord
 
@@ -46,7 +46,10 @@ class Workspace(Canvas):
             messagebox.showinfo(message="Clipboard is Empty.")
 
     def load_image_from_file(self, path):
-        self.load_image(Image.open(path))
+        try:
+            self.load_image(Image.open(path))
+        except UnidentifiedImageError:
+            messagebox.showinfo(message="Invalid image file.")
 
     def load_image(self, image):
         self.image_original = image
@@ -64,7 +67,8 @@ class Workspace(Canvas):
                                           initialdir=getcwd(),
                                           title="Please select a file:",
                                           filetypes=file_types)
-        self.load_image_from_file(path)
+        if path:
+            self.load_image_from_file(path)
 
     def on_mouseover(self, event):
         self.update_coords_label_callback(
