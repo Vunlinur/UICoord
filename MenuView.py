@@ -1,10 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 
-from CoordList import Coord
+from Model import Coord
 
 
-class CoordMenu(Frame):
+class MenuView(Frame):
     def __init__(self, parent: Tk, *args, **kwargs):
         Frame.__init__(self, parent, width=400, *args, **kwargs)
         self.parent = parent

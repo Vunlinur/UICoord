@@ -1,17 +1,13 @@
 from cmath import sqrt
-from os import getcwd
 from tkinter import *
-from tkinter import simpledialog, filedialog, messagebox
+from tkinter import simpledialog
 
-from PIL import ImageTk, Image, ImageGrab
+from PIL import ImageTk
 
-from CoordList import Coord
+from Model import Coord
 
 
-class Workspace(Canvas):
-    supported_filetypes = ".apng .blp .bmp .cur .eps .gif .icb .j2c .j2k .jp2 .jpc .jpe .jpeg .jpf .jpg .jps .jpx " \
-                          ".mpo .pcx .pixar .png .pns .psd .pxr .tga .tif .tiff .vda .vst .xbm"
-
+class WorkspaceView(Canvas):
     def __init__(self, parent: Tk, *args, **kwargs):
         Canvas.__init__(self, parent, bd=0, *args, **kwargs)
         self.parent = parent
@@ -20,13 +16,14 @@ class Workspace(Canvas):
         self.pack(side=LEFT, fill=BOTH, expand=YES, padx=12, pady=12)
 
         #  Member variables
-        self.image_original = None
         self.image = None
         self.photo_image = None
         self.image_aspect_ratio = 1.0
         self.scale = 1.0
         self.last_coord = (0.0, 0.0)
         self.marker = self.create_rectangle(0, 0, 0, 0)
+
+        self.get_image_original_callback = None
 
         # Binds, callbacks
         self.bind('<Motion>', self.on_mouseover)
@@ -39,32 +36,49 @@ class Workspace(Canvas):
         self.get_coord_callback = None
         self.update_coords_label_callback = None
 
-    def load_image_from_clipboard(self):
-        try:
-            self.load_image(ImageGrab.grabclipboard())
-        except AttributeError:
-            messagebox.showinfo(message="Clipboard is Empty.")
-
-    def load_image_from_file(self, path):
-        self.load_image(Image.open(path))
-
     def load_image(self, image):
-        self.image_original = image
-        self.image_aspect_ratio = self.image_original.size[0] / self.image_original.size[1]
+        self.image_aspect_ratio = image.size[0] / image.size[1]
         # Gently calls on_resize function to fit the picture to the workspace.
         # Calling on_resize manually here executes it before the workspace is created and fails with its width/height.
         self.event_generate("<Configure>")
 
-    def open_image_from_dialog(self):
-        file_types = [
-            ('image files', self.supported_filetypes),
-            ('all files', '.*')
-        ]
-        path = filedialog.askopenfilename(parent=self,
-                                          initialdir=getcwd(),
-                                          title="Please select a file:",
-                                          filetypes=file_types)
-        self.load_image_from_file(path)
+    def paint_marker_from_workspace(self, event):
+        if self.last_coord != (0, 0):
+            self.delete(self.marker)
+            self.marker = self.create_rectangle(self.last_coord[0], self.last_coord[1], event.x,
+                                                event.y, outline="red", width=2)
+
+    def paint_marker_from_list(self, index):
+        self.clear_marker()
+        if index == -1:
+            return
+
+        kwargs = {
+            "outline": "red",
+            "width": 2
+        }
+        coord = self.get_coord_callback(index)
+        if coord.type == coord.RECTANGLE:
+            self.marker = self.create_rectangle(
+                coord.x1 * self.image.size[0],
+                coord.y1 * self.image.size[1],
+                coord.x2 * self.image.size[0],
+                coord.y2 * self.image.size[1],
+                kwargs
+            )
+        else:
+            radius = 3
+            self.marker = self.create_oval(
+                coord.x1 * self.image.size[0] - radius,
+                coord.y1 * self.image.size[1] - radius,
+                coord.x1 * self.image.size[0] + radius,
+                coord.y1 * self.image.size[1] + radius,
+                kwargs, fill="red"
+            )
+
+    def clear_marker(self):
+        self.last_coord = (0, 0)
+        self.delete(self.marker)
 
     def on_mouseover(self, event):
         self.update_coords_label_callback(
@@ -72,12 +86,6 @@ class Workspace(Canvas):
             event.y / self.image.size[1]
         )
         self.paint_marker_from_workspace(event)
-
-    def paint_marker_from_workspace(self, event):
-        if self.last_coord != (0, 0):
-            self.delete(self.marker)
-            self.marker = self.create_rectangle(self.last_coord[0], self.last_coord[1], event.x,
-                                                event.y, outline="red", width=2)
 
     def on_resize(self, event):
         self.clear_marker()
@@ -98,7 +106,8 @@ class Workspace(Canvas):
         else:
             self.scale = scale
 
-        self.image = self.image_original.resize(scale)
+        self.image = self.get_image_original_callback().resize(scale)
+        # photo_image has to be permanent, otherwise the image object is garbage collected
         self.photo_image = ImageTk.PhotoImage(self.image)
         self.create_image(0, 0, anchor=NW, image=self.photo_image)
 
@@ -142,35 +151,3 @@ class Workspace(Canvas):
 
         self.add_coord_callback(coord)
         self.clear_marker()
-
-    def paint_marker_from_list(self, index):
-        self.clear_marker()
-        if index == -1:
-            return
-
-        kwargs = {
-            "outline": "red",
-            "width": 2
-        }
-        coord = self.get_coord_callback(index)
-        if coord.type == coord.RECTANGLE:
-            self.marker = self.create_rectangle(
-                coord.x1 * self.image.size[0],
-                coord.y1 * self.image.size[1],
-                coord.x2 * self.image.size[0],
-                coord.y2 * self.image.size[1],
-                kwargs
-            )
-        else:
-            radius = 3
-            self.marker = self.create_oval(
-                coord.x1 * self.image.size[0] - radius,
-                coord.y1 * self.image.size[1] - radius,
-                coord.x1 * self.image.size[0] + radius,
-                coord.y1 * self.image.size[1] + radius,
-                kwargs, fill="red"
-            )
-
-    def clear_marker(self):
-        self.last_coord = (0, 0)
-        self.delete(self.marker)

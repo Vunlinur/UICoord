@@ -1,5 +1,6 @@
-from os import linesep
-from tkinter import Tk
+import PIL
+
+from PIL import Image
 
 
 class Coord:
@@ -26,22 +27,22 @@ class Coord:
         return [self.__getattribute__(key) or "" for key in self.COLUMN_DEFAULTS.keys()]
 
 
-class CoordList(list):
-    def __init__(self, widget: Tk):
-        self.widget = widget
-        self.display_coord = None
-        self.get_pattern_callback = None
-        super().__init__()
+class Model:
+    def __init__(self):
+        self._coord_list: list = []
+        self._image_original: PIL.Image = None
 
-    def add_coord(self, coord):
-        assert type(coord) == Coord
-        self.append(coord)
-        self.display_coord(coord.row_data())
+    def add_coord(self, coord: Coord):
+        self._coord_list.append(coord)
 
-    def get_coord(self, index):
-        return self[index]
+    def get_coord(self, index: int):
+        return self._coord_list[index]
 
-    def format_and_copy(self):
-        rows = linesep.join([self.get_pattern_callback().format(**coord.__dict__) for coord in self])
-        self.widget.clipboard_clear()
-        self.widget.clipboard_append(rows)
+    def get_coord_list(self):
+        return self._coord_list
+
+    def set_image(self, image: PIL.Image):
+        self._image_original = image
+
+    def get_image(self):
+        return self._image_original
