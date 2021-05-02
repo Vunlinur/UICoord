@@ -1,4 +1,6 @@
+# project files
 uisample.png
+*.coord
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

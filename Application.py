@@ -10,13 +10,14 @@ class MainApplication(Frame):
         self.parent.geometry('1600x800')
 
         self.controller = Controller(self.parent)
-        self.controller.load_image_from_file("uisample.png")
+        self.controller.deserialize_path("kiru.coord")
+        #self.controller.load_image_from_file("uisample.png")
 
         self.menu_bar = Menu(self.parent)
         self.file_menu = Menu(self.menu_bar, tearoff=0)
         self.file_menu.add_command(label="New project", command=..., state="disabled")
-        self.file_menu.add_command(label="Open project", command=..., state="disabled")
-        self.file_menu.add_command(label="Save project", command=..., state="disabled")
+        self.file_menu.add_command(label="Open project", command=self.controller.deserialize)
+        self.file_menu.add_command(label="Save project", command=self.controller.serialize)
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Open image", command=self.controller.open_image_from_dialog)
         self.file_menu.add_command(label="Load image from clipboard", command=self.controller.load_image_from_clipboard)

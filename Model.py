@@ -1,6 +1,7 @@
-import PIL
+import pickle
+from io import BytesIO
 
-from PIL import Image
+from PIL.Image import Image, open as OpenImage
 
 
 class Coord:
@@ -28,9 +29,16 @@ class Coord:
 
 
 class Model:
+    class Serialized:
+        def __init__(self):
+            self.coords = None
+            self.image = None
+
     def __init__(self):
         self._coord_list: list = []
-        self._image_original: PIL.Image = None
+        self._image_original: Image = None
+
+    # Coords
 
     def add_coord(self, coord: Coord):
         self._coord_list.append(coord)
@@ -41,8 +49,35 @@ class Model:
     def get_coord_list(self):
         return self._coord_list
 
-    def set_image(self, image: PIL.Image):
+    # Image
+
+    def set_image(self, image: Image):
         self._image_original = image
 
-    def get_image(self):
+    def get_image(self) -> Image:
         return self._image_original
+
+    # Serialization
+
+    def serialize(self, path):
+        #  Because PIL.Image.tobytes() is broken:
+        #  https://stackoverflow.com/questions/31077366/pil-cannot-identify-image-file-for-io-bytesio-object
+        byteImgIO = BytesIO()
+        self._image_original.save(byteImgIO, "PNG")
+        byteImgIO.seek(0)
+
+        data = self.Serialized()
+        data.coords = self._coord_list
+        data.image = byteImgIO.read()
+
+        pickle.dump(data, open(path, "wb"))
+
+    def deserialize(self, path):
+        self.__init__()
+
+        data: Model.Serialized = pickle.load(open(path, "rb"))
+
+        for coord in data.coords:
+            self.add_coord(coord)
+
+        self._image_original = OpenImage(BytesIO(data.image))

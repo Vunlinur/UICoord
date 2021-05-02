@@ -66,12 +66,18 @@ class MenuView(Frame):
                 self.tree.item(self.last_focus, tags=[])
 
             self.tree.item(item_id, tags=["focus"])
-            index = int(item_id[1:]) - 1 if item_id != "" else -1
+
+            index = int(item_id) - 1 if item_id != "" else -1
             self.paint_marker_from_list_callback(index)
 
     def update_coords_label(self, x, y):
         self.coord_text.set('x:{:.4f}, y:{:.4f}'.format(x, y))
 
     def insert(self, item):
-        print(item)
-        self.tree.insert('', 'end', values=item)
+        # Assigning to index 0 results in assigning to the default "I001".
+        # The numeration does not reset when clearing the list, I deal with it with a custom index.
+        index = len(self.tree.get_children()) + 1
+        self.tree.insert('', 'end', index, values=item)
+
+    def clear(self):
+        self.tree.delete(*self.tree.get_children())

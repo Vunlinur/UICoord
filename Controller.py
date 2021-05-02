@@ -10,8 +10,10 @@ from WorkspaceView import WorkspaceView
 
 
 class Controller:
-    supported_filetypes = ".apng .blp .bmp .cur .eps .gif .icb .j2c .j2k .jp2 .jpc .jpe .jpeg .jpf .jpg .jps .jpx " \
-                          ".mpo .pcx .pixar .png .pns .psd .pxr .tga .tif .tiff .vda .vst .xbm"
+    supported_file_types = ".apng .blp .bmp .cur .eps .gif .icb .j2c .j2k .jp2 .jpc .jpe .jpeg .jpf .jpg .jps .jpx " \
+                           ".mpo .pcx .pixar .png .pns .psd .pxr .tga .tif .tiff .vda .vst .xbm"
+    project_extension = ".coord"
+    project_file_types = [('Coord project files', project_extension)]
 
     def __init__(self, parent: Tk):
         self.parent = parent
@@ -63,7 +65,7 @@ class Controller:
 
     def open_image_from_dialog(self):
         file_types = [
-            ('image files', self.supported_filetypes),
+            ('image files', self.supported_file_types),
             ('all files', '.*')
         ]
         path = filedialog.askopenfilename(parent=self.parent,
@@ -72,3 +74,35 @@ class Controller:
                                           filetypes=file_types)
         if path:
             self.load_image_from_file(path)
+
+    # Serialization
+
+    def serialize_path(self, path):
+        if not path.endswith(self.project_extension):
+            path += self.project_extension
+        self.model.serialize(path)
+
+    def serialize(self):
+        path = filedialog.asksaveasfilename(parent=self.parent,
+                                            initialdir=getcwd(),
+                                            title="Please select a file name for saving:",
+                                            filetypes=self.project_file_types)
+        if path:
+            self.serialize_path(path)
+
+    def deserialize_path(self, path):
+        self.model.deserialize(path)
+
+        self.workspace.load_image(self.model.get_image())
+
+        self.menu.clear()
+        for coord in self.model.get_coord_list():
+            self.menu.insert(coord.row_data())
+
+    def deserialize(self):
+        path = filedialog.askopenfilename(parent=self.parent,
+                                          initialdir=getcwd(),
+                                          title="Please select a file:",
+                                          filetypes=self.project_file_types)
+        if path:
+            self.deserialize_path(path)
