@@ -31,23 +31,26 @@ class Coord:
 class Model:
     class Serialized:
         def __init__(self):
-            self.coords = None
+            self.coords: list = None
             self.image = None
 
     def __init__(self):
-        self._coord_list: list = []
+        self._coords: dict = {}
         self._image_original: Image = None
 
     # Coords
 
-    def add_coord(self, coord: Coord):
-        self._coord_list.append(coord)
+    def add_coord(self, key: str, coord: Coord):
+        self._coords[key] = coord
 
-    def get_coord(self, index: int):
-        return self._coord_list[index]
+    def delete_coord(self, key: str):
+        del self._coords[key]
+
+    def get_coord(self, key: str):
+        return self._coords[key]
 
     def get_coord_list(self):
-        return self._coord_list
+        return self._coords
 
     # Image
 
@@ -67,7 +70,8 @@ class Model:
         byteImgIO.seek(0)
 
         data = self.Serialized()
-        data.coords = self._coord_list
+        # We need to ensure we do not duplicate keys upon deserializing, so we can discard them
+        data.coords = list(self._coords.values())
         data.image = byteImgIO.read()
 
         pickle.dump(data, open(path, "wb"))
@@ -76,8 +80,7 @@ class Model:
         self.__init__()
 
         data: Model.Serialized = pickle.load(open(path, "rb"))
-
-        for coord in data.coords:
-            self.add_coord(coord)
-
         self._image_original = OpenImage(BytesIO(data.image))
+        # We have to return the coords as they have to be added to the UI first.
+        # This is where we get the Model dict key from.
+        return data

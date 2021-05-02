@@ -46,6 +46,11 @@ class MenuView(Frame):
         self.coords.grid_columnconfigure(0, weight=1)
         self.coords.pack(fill=Y, expand=YES, padx=12, pady=12)
 
+        # context menu
+        self.context_menu = Menu(self, tearoff=0)
+        self.context_menu.add_command(label="Delete", command=self.delete)
+        self.context_menu.add_command(label="Select All", command=...)
+
         # export
         self.export = Frame(self)
         self.export.pack(side=BOTTOM, fill=X, padx=12, pady=12)
@@ -55,29 +60,39 @@ class MenuView(Frame):
 
         # Binds, callbacks
         self.tree.bind("<Motion>", self.on_list_mouseover)
+        self.tree.bind("<Button-3>", self.on_right_click)
 
         self.paint_marker_from_list_callback = None
+        self.delete_coord_callback = None
 
     def on_list_mouseover(self, event):
         item_id = self.tree.identify_row(event.y)
 
         if item_id != self.last_focus:
-            if self.last_focus:
-                self.tree.item(self.last_focus, tags=[])
+            self.last_focus = item_id
+            self.paint_marker_from_list_callback(item_id)
 
-            self.tree.item(item_id, tags=["focus"])
+    def on_right_click(self, event):
+        item_id = self.tree.identify_row(event.y)
+        if item_id:
+            if item_id not in self.tree.selection():
+                self.tree.selection_set(item_id)
 
-            index = int(item_id) - 1 if item_id != "" else -1
-            self.paint_marker_from_list_callback(index)
+            try:
+                self.context_menu.post(event.x_root, event.y_root)
+            finally:
+                self.context_menu.grab_release()
 
     def update_coords_label(self, x, y):
         self.coord_text.set('x:{:.4f}, y:{:.4f}'.format(x, y))
 
-    def insert(self, item):
-        # Assigning to index 0 results in assigning to the default "I001".
-        # The numeration does not reset when clearing the list, I deal with it with a custom index.
-        index = len(self.tree.get_children()) + 1
-        self.tree.insert('', 'end', index, values=item)
+    def insert(self, item: Coord):
+        return self.tree.insert('', 'end', values=item)
+
+    def delete(self):
+        for index in self.tree.selection():
+            self.delete_coord_callback(index)
+            self.tree.delete(index)
 
     def clear(self):
         self.tree.delete(*self.tree.get_children())

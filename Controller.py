@@ -29,14 +29,15 @@ class Controller:
         self.workspace.get_image_original_callback = self.model.get_image
 
         self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
+        self.menu.delete_coord_callback = self.model.delete_coord
 
     # Coord
 
     def add_coord(self, coord: Coord):
-        self.model.add_coord(coord)
-        self.menu.insert(coord.row_data())
+        iid = self.menu.insert(coord.row_data())
+        self.model.add_coord(iid, coord)
 
-    def get_coord(self, index: int):
+    def get_coord(self, index: str):
         return self.model.get_coord(index)
 
     def format_and_copy(self):
@@ -91,13 +92,12 @@ class Controller:
             self.serialize_path(path)
 
     def deserialize_path(self, path):
-        self.model.deserialize(path)
+        data = self.model.deserialize(path)
+        self.menu.clear()
+        for coord in data.coords:
+            self.add_coord(coord)
 
         self.workspace.load_image(self.model.get_image())
-
-        self.menu.clear()
-        for coord in self.model.get_coord_list():
-            self.menu.insert(coord.row_data())
 
     def deserialize(self):
         path = filedialog.askopenfilename(parent=self.parent,

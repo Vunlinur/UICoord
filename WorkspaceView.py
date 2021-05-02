@@ -48,16 +48,16 @@ class WorkspaceView(Canvas):
             self.marker = self.create_rectangle(self.last_coord[0], self.last_coord[1], event.x,
                                                 event.y, outline="red", width=2)
 
-    def paint_marker_from_list(self, index):
+    def paint_marker_from_list(self, key: str):
         self.clear_marker()
-        if index == -1:
+        if not key:
             return
 
         kwargs = {
             "outline": "red",
             "width": 2
         }
-        coord = self.get_coord_callback(index)
+        coord = self.get_coord_callback(key)
         if coord.type == coord.RECTANGLE:
             self.marker = self.create_rectangle(
                 coord.x1 * self.image.size[0],
