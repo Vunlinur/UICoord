@@ -49,7 +49,7 @@ class Model:
     def get_coord(self, key: str):
         return self._coords[key]
 
-    def get_coord_list(self):
+    def get_coords(self):
         return self._coords
 
     # Image

@@ -42,7 +42,7 @@ class Controller:
 
     def format_and_copy(self):
         rows = linesep.join(
-            [self.menu.pattern.get().format(**coord.__dict__) for coord in self.model.get_coord_list()])
+            [self.menu.pattern.get().format(**coord.__dict__) for coord in self.model.get_coords().values()])
         self.parent.clipboard_clear()
         self.parent.clipboard_append(rows)
 
