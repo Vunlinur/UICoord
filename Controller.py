@@ -24,6 +24,8 @@ class Controller:
 
         self.session = None
 
+        self.new_project()
+
         # Callbacks
         self.workspace.add_coord_callback = self.add_coord
         self.workspace.get_coord_callback = self.get_coord
@@ -34,6 +36,8 @@ class Controller:
         self.menu.delete_coord_callback = self.model.delete_coord
 
         self.parent.bind('<Control-s>', lambda _: self.serialize_session())
+        self.parent.bind('<Control-n>', lambda _: self.new_project_dialog())
+        self.parent.bind('<Control-v>', lambda _: self.load_image_from_clipboard())
 
     # Coord
 
@@ -80,6 +84,21 @@ class Controller:
         if path:
             self.load_image_from_file(path)
 
+    # Project
+
+    def new_project(self):
+        self.session = None
+        image = Image.new('RGBA', (1, 1))
+        self.model.__init__()
+        self.model.set_image(image)
+        self.workspace.load_image(image)
+        self.menu.clear()
+
+    def new_project_dialog(self):
+        answer = messagebox.askokcancel("Create a new project", "Do you want to create a new project?")
+        if answer:
+            self.new_project()
+
     # Serialization
 
     def serialize_path(self, path):
@@ -92,9 +111,9 @@ class Controller:
         if self.session:
             self.serialize_path(self.session)
         else:
-            self.serialize()
+            self.serialize_dialog()
 
-    def serialize(self):
+    def serialize_dialog(self):
         path = filedialog.asksaveasfilename(parent=self.parent,
                                             initialdir=getcwd(),
                                             title="Please select a file name for saving:",
@@ -111,10 +130,10 @@ class Controller:
 
         self.workspace.load_image(self.model.get_image())
 
-    def deserialize(self):
+    def deserialize_dialog(self):
         path = filedialog.askopenfilename(parent=self.parent,
                                           initialdir=getcwd(),
-                                          title="Please select a file:",
+                                          title="Please select a project file to open:",
                                           filetypes=self.project_file_types)
         if path:
             self.deserialize_path(path)
