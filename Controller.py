@@ -22,6 +22,8 @@ class Controller:
         self.menu = MenuView(self.parent)
         self.workspace = WorkspaceView(self.parent)
 
+        self.session = None
+
         # Callbacks
         self.workspace.add_coord_callback = self.add_coord
         self.workspace.get_coord_callback = self.get_coord
@@ -30,6 +32,8 @@ class Controller:
 
         self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
         self.menu.delete_coord_callback = self.model.delete_coord
+
+        self.parent.bind('<Control-s>', lambda _: self.serialize_session())
 
     # Coord
 
@@ -83,12 +87,19 @@ class Controller:
             path += self.project_extension
         self.model.serialize(path)
 
+    def serialize_session(self):
+        if self.session:
+            self.serialize_path(self.session)
+        else:
+            self.serialize()
+
     def serialize(self):
         path = filedialog.asksaveasfilename(parent=self.parent,
                                             initialdir=getcwd(),
                                             title="Please select a file name for saving:",
                                             filetypes=self.project_file_types)
         if path:
+            self.session = path
             self.serialize_path(path)
 
     def deserialize_path(self, path):
@@ -106,3 +117,4 @@ class Controller:
                                           filetypes=self.project_file_types)
         if path:
             self.deserialize_path(path)
+            self.session = path
