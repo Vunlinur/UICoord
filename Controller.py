@@ -86,6 +86,7 @@ class Controller:
         if not path.endswith(self.project_extension):
             path += self.project_extension
         self.model.serialize(path)
+        self.session = path
 
     def serialize_session(self):
         if self.session:
@@ -99,10 +100,10 @@ class Controller:
                                             title="Please select a file name for saving:",
                                             filetypes=self.project_file_types)
         if path:
-            self.session = path
             self.serialize_path(path)
 
     def deserialize_path(self, path):
+        self.session = path
         data = self.model.deserialize(path)
         self.menu.clear()
         for coord in data.coords:
@@ -117,4 +118,3 @@ class Controller:
                                           filetypes=self.project_file_types)
         if path:
             self.deserialize_path(path)
-            self.session = path
