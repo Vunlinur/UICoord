@@ -49,7 +49,7 @@ class MenuView(Frame):
         # context menu
         self.context_menu = Menu(self, tearoff=0)
         self.context_menu.add_command(label="Delete", command=self.delete)
-        self.context_menu.add_command(label="Select All", command=...)
+        self.context_menu.add_command(label="Select All", command=self.select_all)
 
         # export
         self.export = Frame(self)
@@ -93,6 +93,9 @@ class MenuView(Frame):
         for index in self.tree.selection():
             self.delete_coord_callback(index)
             self.tree.delete(index)
+
+    def select_all(self):
+        self.tree.selection_set(self.tree.get_children())
 
     def clear(self):
         self.tree.delete(*self.tree.get_children())
