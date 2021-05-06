@@ -22,6 +22,27 @@ class Controller:
         self.menu = MenuView(self.parent)
         self.workspace = WorkspaceView(self.parent)
 
+        # Setup Menu Bar
+        self.menu_bar = Menu(self.parent)
+        self.file_menu = Menu(self.menu_bar, tearoff=0)
+        self.file_menu.add_command(label="New project", command=self.new_project_dialog, accelerator="Ctrl+N")
+        self.file_menu.add_command(label="Open project", command=self.deserialize_dialog)
+        self.file_menu.add_command(label="Save project", command=self.serialize_session, accelerator="Ctrl+S")
+        self.file_menu.add_command(label="Save project as", command=self.serialize_dialog)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Open image", command=self.open_image_from_dialog)
+        self.file_menu.add_command(label="Load image from clipboard", command=self.load_image_from_clipboard, accelerator="Ctrl+V")
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Generate text output", command=self.format_and_copy)
+        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
+
+        self.help_menu = Menu(self.menu_bar, tearoff=0)
+        self.help_menu.add_command(label="Settings", command=..., state="disabled")
+        self.menu_bar.add_cascade(label="Settings", menu=self.help_menu)
+
+        self.parent.config(menu=self.menu_bar)
+
+        # Project
         self.session = None
 
         self.new_project()
