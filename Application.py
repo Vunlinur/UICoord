@@ -10,8 +10,6 @@ class MainApplication(Frame):
         self.parent.geometry('1600x800')
 
         self.controller = Controller(self.parent)
-        self.controller.deserialize_path("kiru.coord")
-        #self.controller.load_image_from_file("uisample.png")
 
 
 if __name__ == "__main__":

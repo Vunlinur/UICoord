@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 from os import getcwd, linesep
 from tkinter import *
 from tkinter import filedialog, messagebox
@@ -22,6 +23,10 @@ class Controller:
         self.menu = MenuView(self.parent)
         self.workspace = WorkspaceView(self.parent)
 
+        self.session = None
+
+        self.start()
+
         # Setup Menu Bar
         self.menu_bar = Menu(self.parent)
         self.file_menu = Menu(self.menu_bar, tearoff=0)
@@ -42,11 +47,6 @@ class Controller:
 
         self.parent.config(menu=self.menu_bar)
 
-        # Project
-        self.session = None
-
-        self.new_project()
-
         # Callbacks
         self.workspace.add_coord_callback = self.add_coord
         self.workspace.get_coord_callback = self.get_coord
@@ -59,6 +59,27 @@ class Controller:
         self.parent.bind('<Control-s>', lambda _: self.serialize_session())
         self.parent.bind('<Control-n>', lambda _: self.new_project_dialog())
         self.parent.bind('<Control-v>', lambda _: self.load_image_from_clipboard())
+
+    def start(self):
+        parser = ArgumentParser()
+        group = parser.add_mutually_exclusive_group(required=False)
+        group.add_argument('--open', '-o', type=str, )
+        group.add_argument('--paste', '-p', action='store_true')
+        args = parser.parse_args()
+
+        if args.paste:
+            self.load_image_from_clipboard()
+            return
+
+        if args.open:
+            path = args.open
+            if path.endswith(".coord"):
+                self.deserialize_path(path)
+            else:
+                self.load_image_from_file(path)
+            return
+
+        self.new_project()
 
     # Coord
 
