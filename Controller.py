@@ -6,10 +6,10 @@ from tkinter import messagebox
 from PIL import Image, ImageGrab, UnidentifiedImageError
 
 from Config import project_extension
-from MenuBar import MenuBar
-from MenuView import MenuView
+from Interface.MenuBar import MenuBar
+from Interface.MenuView import MenuView
 from Model import Coord, Model
-from WorkspaceView import WorkspaceView
+from Interface.WorkspaceView import WorkspaceView
 
 
 class Controller:
