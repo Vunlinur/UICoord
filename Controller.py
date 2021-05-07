@@ -1,53 +1,37 @@
 from argparse import ArgumentParser
-from os import getcwd, linesep
+from os import linesep
 from tkinter import *
-from tkinter import filedialog, messagebox
+from tkinter import messagebox
 
 from PIL import Image, ImageGrab, UnidentifiedImageError
 
+from Config import project_extension
+from MenuBar import MenuBar
 from MenuView import MenuView
 from Model import Coord, Model
 from WorkspaceView import WorkspaceView
 
 
 class Controller:
-    supported_file_types = ".apng .blp .bmp .cur .eps .gif .icb .j2c .j2k .jp2 .jpc .jpe .jpeg .jpf .jpg .jps .jpx " \
-                           ".mpo .pcx .pixar .png .pns .psd .pxr .tga .tif .tiff .vda .vst .xbm"
-    project_extension = ".coord"
-    project_file_types = [('Coord project files', project_extension)]
-
     def __init__(self, parent: Tk):
         self.parent = parent
 
         self.model = Model()
         self.menu = MenuView(self.parent)
         self.workspace = WorkspaceView(self.parent)
+        self.menu_bar = MenuBar(self.parent)
 
         self.session = None
 
-        self.start()
-
-        # Setup Menu Bar
-        self.menu_bar = Menu(self.parent)
-        self.file_menu = Menu(self.menu_bar, tearoff=0)
-        self.file_menu.add_command(label="New project", command=self.new_project_dialog, accelerator="Ctrl+N")
-        self.file_menu.add_command(label="Open project", command=self.deserialize_dialog)
-        self.file_menu.add_command(label="Save project", command=self.serialize_session, accelerator="Ctrl+S")
-        self.file_menu.add_command(label="Save project as", command=self.serialize_dialog)
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label="Open image", command=self.open_image_from_dialog)
-        self.file_menu.add_command(label="Load image from clipboard", command=self.load_image_from_clipboard, accelerator="Ctrl+V")
-        self.file_menu.add_separator()
-        self.file_menu.add_command(label="Generate text output", command=self.format_and_copy)
-        self.menu_bar.add_cascade(label="File", menu=self.file_menu)
-
-        self.help_menu = Menu(self.menu_bar, tearoff=0)
-        self.help_menu.add_command(label="Settings", command=..., state="disabled")
-        self.menu_bar.add_cascade(label="Settings", menu=self.help_menu)
-
-        self.parent.config(menu=self.menu_bar)
-
         # Callbacks
+        self.menu_bar.get_session_callback = self.get_session
+        self.menu_bar.load_image_from_file_callback = self.load_image_from_file
+        self.menu_bar.new_project_callback = self.new_project
+        self.menu_bar.serialize_path_callback = self.serialize_path
+        self.menu_bar.deserialize_path_callback = self.deserialize_path
+        self.menu_bar.load_image_from_clipboard_callback = self.load_image_from_clipboard
+        self.menu_bar.format_and_copy_callback = self.format_and_copy
+
         self.workspace.add_coord_callback = self.add_coord
         self.workspace.get_coord_callback = self.get_coord
         self.workspace.update_coords_label_callback = self.menu.update_coords_label
@@ -56,11 +40,13 @@ class Controller:
         self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
         self.menu.delete_coord_callback = self.model.delete_coord
 
-        self.parent.bind('<Control-s>', lambda _: self.serialize_session())
-        self.parent.bind('<Control-n>', lambda _: self.new_project_dialog())
-        self.parent.bind('<Control-v>', lambda _: self.load_image_from_clipboard())
+        self.start()
 
     def start(self):
+        """
+        Parses command line arguments.
+        Launches a new project if no arguments were specified.
+        """
         parser = ArgumentParser()
         group = parser.add_mutually_exclusive_group(required=False)
         group.add_argument('--open', '-o', type=str, )
@@ -73,13 +59,16 @@ class Controller:
 
         if args.open:
             path = args.open
-            if path.endswith(".coord"):
+            if path.endswith(project_extension):
                 self.deserialize_path(path)
             else:
                 self.load_image_from_file(path)
             return
 
         self.new_project()
+
+    def get_session(self):
+        return self.session
 
     # Coord
 
@@ -114,18 +103,6 @@ class Controller:
         except UnidentifiedImageError:
             messagebox.showinfo(message="Invalid image file.")
 
-    def open_image_from_dialog(self):
-        file_types = [
-            ('image files', self.supported_file_types),
-            ('all files', '.*')
-        ]
-        path = filedialog.askopenfilename(parent=self.parent,
-                                          initialdir=getcwd(),
-                                          title="Please select a file:",
-                                          filetypes=file_types)
-        if path:
-            self.load_image_from_file(path)
-
     # Project
 
     def new_project(self):
@@ -136,32 +113,13 @@ class Controller:
         self.workspace.load_image(image)
         self.menu.clear()
 
-    def new_project_dialog(self):
-        answer = messagebox.askokcancel("Create a new project", "Do you want to create a new project?")
-        if answer:
-            self.new_project()
-
     # Serialization
 
     def serialize_path(self, path):
-        if not path.endswith(self.project_extension):
-            path += self.project_extension
+        if not path.endswith(project_extension):
+            path += project_extension
         self.model.serialize(path)
         self.session = path
-
-    def serialize_session(self):
-        if self.session:
-            self.serialize_path(self.session)
-        else:
-            self.serialize_dialog()
-
-    def serialize_dialog(self):
-        path = filedialog.asksaveasfilename(parent=self.parent,
-                                            initialdir=getcwd(),
-                                            title="Please select a file name for saving:",
-                                            filetypes=self.project_file_types)
-        if path:
-            self.serialize_path(path)
 
     def deserialize_path(self, path):
         self.session = path
@@ -171,11 +129,3 @@ class Controller:
             self.add_coord(coord)
 
         self.workspace.load_image(self.model.get_image())
-
-    def deserialize_dialog(self):
-        path = filedialog.askopenfilename(parent=self.parent,
-                                          initialdir=getcwd(),
-                                          title="Please select a project file to open:",
-                                          filetypes=self.project_file_types)
-        if path:
-            self.deserialize_path(path)
