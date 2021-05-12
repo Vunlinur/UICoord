@@ -18,5 +18,11 @@ class Coord:
         [self.__setattr__(key, kwargs.get(key, val)) for key, val in self.COLUMN_DEFAULTS.items()]
         self.type = self.POINT if self.x2 == None and self.y2 == None else self.RECTANGLE
 
+    def column_data(self, key, value=None):
+        if not value:
+            return self.__getattribute__(key)
+        else:
+            return self.__setattr__(key, value)
+
     def row_data(self):
         return [self.__getattribute__(key) or "" for key in self.COLUMN_DEFAULTS.keys()]

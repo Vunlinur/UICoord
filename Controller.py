@@ -8,8 +8,8 @@ from PIL import Image, ImageGrab, UnidentifiedImageError
 from Config import project_extension
 from Interface.MenuBar import MenuBar
 from Interface.MenuView import MenuView
-from Model import Coord, Model
 from Interface.WorkspaceView import WorkspaceView
+from Model import Coord, Model
 
 
 class Controller:
@@ -38,11 +38,14 @@ class Controller:
         self.workspace.get_image_original_callback = self.model.get_image
 
         self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
+        self.menu.get_coord_callback = self.get_coord
+        self.menu.set_coord_callback = self.set_coord
         self.menu.delete_coord_callback = self.model.delete_coord
 
-        self.start()
+        self.menu.configure_callbacks()
+        self.initialize()
 
-    def start(self):
+    def initialize(self):
         """
         Parses command line arguments.
         Launches a new project if no arguments were specified.
@@ -73,11 +76,15 @@ class Controller:
     # Coord
 
     def add_coord(self, coord: Coord):
-        iid = self.menu.insert(coord.row_data())
-        self.model.add_coord(iid, coord)
+        key = self.menu.insert_coord(coord.row_data())
+        self.model.set_coord(key, coord)
 
-    def get_coord(self, index: str):
-        return self.model.get_coord(index)
+    def get_coord(self, key: str):
+        return self.model.get_coord(key)
+
+    def set_coord(self, key: str, coord: Coord):
+        self.model.set_coord(key, coord)
+        self.menu.set_coord(key, coord.row_data())
 
     def format_and_copy(self):
         rows = linesep.join(

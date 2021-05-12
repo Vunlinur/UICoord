@@ -18,14 +18,14 @@ class Model:
 
     # Coords
 
-    def add_coord(self, key: str, coord: Coord):
+    def get_coord(self, key: str):
+        return self._coords[key]
+
+    def set_coord(self, key: str, coord: Coord):
         self._coords[key] = coord
 
     def delete_coord(self, key: str):
         del self._coords[key]
-
-    def get_coord(self, key: str):
-        return self._coords[key]
 
     def get_coords(self):
         return self._coords
