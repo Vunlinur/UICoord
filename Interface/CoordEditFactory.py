@@ -155,12 +155,14 @@ class NumericEditWidget(TextEditWidget):
         Revert uncommited changes.
         """
         self._coord.column_data(self._column, self._original_value)
+        self._paint_marker_from_coord_callback(self._coord)
 
     def _on_return(self, event):
         value = float(self._text.get())
         self.destroy()
         self._coord.column_data(self._column, value)
         self._set_coord_callback(self._row, self._coord)
+        self._paint_marker_from_coord_callback(self._coord)
 
     def _input_validation(self, new_value, old_value):
         pattern = r"^(0\.\d+|1\.0+)$"
