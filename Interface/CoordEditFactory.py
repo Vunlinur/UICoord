@@ -117,6 +117,7 @@ class NumericEditWidget(TextEditWidget):
         self._drag_icon.pack(side=RIGHT, anchor=W)
 
         self._text.trace("w", self._on_modify_variable)
+        self._widget.bind('<Double-1>', self._on_double_click)
         self._drag_icon.bind("<B1-Motion>", self._on_drag)
         self._drag_icon.bind("<ButtonRelease-1>", self._on_release)
         self.bind("<Destroy>", self._on_destroy)
@@ -128,6 +129,14 @@ class NumericEditWidget(TextEditWidget):
         """
         self._coord.column_data(self._column, float(self._text.get()))
         self._paint_marker_from_coord_callback(self._coord)
+
+    def _on_double_click(self, event):
+        index = self._text.get().find(".")
+        if self._widget.index(INSERT) <= index:
+            self._widget.selection_range(0, index)
+        else:
+            self._widget.selection_range(index + 1, "end")
+        return "break"
 
     def _on_drag(self, event):
         new_event = event.x / 1000
