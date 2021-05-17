@@ -37,7 +37,8 @@ class Controller:
         self.workspace.update_coords_label_callback = self.menu.update_coords_label
         self.workspace.get_image_original_callback = self.model.get_image
 
-        self.menu.paint_marker_from_list_callback = self.workspace.paint_marker_from_list
+        self.menu.clear_marker_callback = self.workspace.clear_marker
+        self.menu.paint_marker_from_coord_callback = self.workspace.paint_marker_from_coord
         self.menu.get_coord_callback = self.get_coord
         self.menu.set_coord_callback = self.set_coord
         self.menu.delete_coord_callback = self.model.delete_coord

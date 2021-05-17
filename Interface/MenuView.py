@@ -40,7 +40,7 @@ class MenuView(Frame):
 
         for column in self.columns:
             self.tree.heading(column, text=column)
-            width = 160 if column == "name" else 50
+            width = 160 if column == "name" else 60
             self.tree.column(column, minwidth=32, width=width, stretch=NO)
 
         #  add tree and scrollbars to frame
@@ -61,11 +61,13 @@ class MenuView(Frame):
 
         # Binds, callbacks
         self.tree.bind("<Motion>", self._on_list_mouseover)
+        self.tree.bind("<Leave>", self._on_leave)
         self.tree.bind("<Button-3>", self._on_right_click)
         self.tree.bind('<Double-1>', self._on_double_click)
         self.tree.bind("<Button>", lambda _: self.coord_edit_factory.close_widget())
 
-        self.paint_marker_from_list_callback = None
+        self.clear_marker_callback = None
+        self.paint_marker_from_coord_callback = None
         self.get_coord_callback = None
         self.set_coord_callback = None
         self.delete_coord_callback = None
@@ -74,6 +76,7 @@ class MenuView(Frame):
         self.coord_edit_factory.get_tree_callback = lambda: self.tree
         self.coord_edit_factory.get_coord_callback = self.get_coord_callback
         self.coord_edit_factory.set_coord_callback = self.set_coord_callback
+        self.coord_edit_factory.paint_marker_from_coord_callback = self.paint_marker_from_coord_callback
 
     def _save_event_to_target_position(self, event: Event):
         self.target_position = {'x': event.x, 'y': event.y}
@@ -81,9 +84,20 @@ class MenuView(Frame):
     def _on_list_mouseover(self, event):
         item_id = self.tree.identify_row(event.y)
 
+        # True only when moving mouse to a different widget
         if item_id != self.last_hovered_coord:
             self.last_hovered_coord = item_id
-            self.paint_marker_from_list_callback(item_id)
+
+            self.clear_marker_callback()
+            if not item_id:
+                return
+
+            coord = self.get_coord_callback(item_id)
+            self.paint_marker_from_coord_callback(coord)
+
+    def _on_leave(self, event):
+        self.clear_marker_callback()
+        self.last_hovered_coord = None
 
     def _on_right_click(self, event):
         self.coord_edit_factory.close_widget()
