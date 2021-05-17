@@ -15,7 +15,7 @@ class MenuBar(Menu):
         self.serialize_path_callback = None
         self.deserialize_path_callback = None
         self.load_image_from_clipboard_callback = None
-        self.format_and_copy_callback = None
+        self.export_menu_callback = None
 
         # Setup menu
         self.parent = parent
@@ -30,7 +30,7 @@ class MenuBar(Menu):
                                    command=lambda: self.load_image_from_clipboard_callback(),
                                    accelerator="Ctrl+V")
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Generate text output", command=lambda: self.format_and_copy_callback())
+        self.file_menu.add_command(label="Generate text output", command=lambda: self.export_menu_callback())
         self.add_cascade(label="File", menu=self.file_menu)
 
         self.help_menu = Menu(self, tearoff=0)

@@ -1,0 +1,4 @@
+CSV|{name},{x1},{y1},{x2},{y2}|{name},{x1},{y1},,
+Json|"{name}": [{x1}, {y1}, {x2},'n{y2}],|"{name}": [{x1}, {y1}],
+Python|"{name}": ({x1}, {y1}, {x2}, {y2}),|"{name}": ({x1}, {y1}),
+C++|map["{name}"] = std::vector<float>{{{x1}, {y1}, {x2}, {y2}}};|map["{name}"] = std::vector<float>{{{x1}, {y1}}};

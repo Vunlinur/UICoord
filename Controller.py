@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
-from os import linesep
 from tkinter import *
 from tkinter import messagebox
 
 from PIL import Image, ImageGrab, UnidentifiedImageError
 
 from Config import project_extension
+from Interface.ExportMenu import ExportMenu
 from Interface.MenuBar import MenuBar
 from Interface.MenuView import MenuView
 from Interface.WorkspaceView import WorkspaceView
@@ -30,7 +30,7 @@ class Controller:
         self.menu_bar.serialize_path_callback = self.serialize_path
         self.menu_bar.deserialize_path_callback = self.deserialize_path
         self.menu_bar.load_image_from_clipboard_callback = self.load_image_from_clipboard
-        self.menu_bar.format_and_copy_callback = self.format_and_copy
+        self.menu_bar.export_menu_callback = self.toggle_export_menu
 
         self.workspace.add_coord_callback = self.add_coord
         self.workspace.get_coord_callback = self.get_coord
@@ -87,11 +87,12 @@ class Controller:
         self.model.set_coord(key, coord)
         self.menu.set_coord(key, coord.row_data())
 
-    def format_and_copy(self):
-        rows = linesep.join(
-            [self.menu.pattern.get().format(**coord.__dict__) for coord in self.model.get_coords().values()])
-        self.parent.clipboard_clear()
-        self.parent.clipboard_append(rows)
+    def get_coords(self):
+        return self.model.get_coords()
+
+    def toggle_export_menu(self):
+        self.export_menu = ExportMenu(self.parent)
+        self.export_menu.get_coords_callback = self.get_coords
 
     # Image
 
