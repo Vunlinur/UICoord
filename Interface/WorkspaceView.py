@@ -1,6 +1,7 @@
 from cmath import sqrt
 from tkinter import *
 from tkinter import simpledialog
+from tkinter.messagebox import showerror
 
 from PIL import ImageTk
 
@@ -120,29 +121,39 @@ class WorkspaceView(Canvas):
             # return when operation was cancelled by right-click
             return
 
-        name = simpledialog.askstring("Name", "Enter the name of the coord:", parent=self.parent)
-        if name is None:
-            self.clear_marker()
-            return
+        coord = self._construct_coord(event)
+        successful = False
+        name = None
 
-        name = name or "Unnamed"
+        while not successful:
+            name = self._coord_name_dialog(name)
+            if name is None:
+                break
+            coord.name = name
+            successful = self.add_coord_callback(coord)
+            if not successful:
+                showerror("Entry exists", "Entry with this name already exists!")
 
+        self.clear_marker()
+
+    def _construct_coord(self, event):
         distance = sqrt(
             pow(self.last_coord[0] - event.x, 2)
             + pow(self.last_coord[1] - event.y, 2)
         ).real
         if distance < 8:
-            coord = Coord(name=name,
-                          x1=event.x / self.image.size[0],
+            coord = Coord(x1=event.x / self.image.size[0],
                           y1=event.y / self.image.size[1]
                           )
         else:
-            coord = Coord(name=name,
-                          x1=self.last_coord[0] / self.image.size[0],
+            coord = Coord(x1=self.last_coord[0] / self.image.size[0],
                           y1=self.last_coord[1] / self.image.size[1],
                           x2=event.x / self.image.size[0],
                           y2=event.y / self.image.size[1]
                           )
+        return coord
 
-        self.add_coord_callback(coord)
-        self.clear_marker()
+    def _coord_name_dialog(self, initial_value=None):
+        return simpledialog.askstring("Name", "Enter the name of the coord:",
+                                      parent=self.parent,
+                                      initialvalue=initial_value)

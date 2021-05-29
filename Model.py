@@ -30,6 +30,9 @@ class Model:
     def get_coords(self):
         return self._coords
 
+    def existing_names(self):
+        return [coord.name for coord in self._coords.values()]
+
     # Image
 
     def set_image(self, image: Image):

@@ -1,5 +1,7 @@
+from copy import deepcopy
 from re import search
 from tkinter import *
+from tkinter.messagebox import showerror
 from tkinter.ttk import Treeview
 
 from numpy import clip
@@ -69,7 +71,7 @@ class TextEditWidget(BaseEditWidget):
         super().__init__(parent, set_coord_callback, row, column, **kw)
 
         self._text = StringVar()
-        self._coord: Coord = get_coord_callback(row)
+        self._coord: Coord = deepcopy(get_coord_callback(row))
         text = self._coord.column_data(self._column)
         if text is None:
             raise self.UneditableField()
@@ -88,8 +90,10 @@ class TextEditWidget(BaseEditWidget):
     def _on_return(self, event):
         value = self._text.get()
         self._coord.column_data(self._column, value)
-        self._set_coord_callback(self._row, self._coord)
-        self.destroy()
+        if self._set_coord_callback(self._row, self._coord):
+            self.destroy()
+        else:
+            showerror("Entry exists", "Entry with this name already exists!")
 
     def select_all(self):
         self._widget.selection_range(0, 'end')

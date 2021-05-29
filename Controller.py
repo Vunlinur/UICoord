@@ -77,15 +77,21 @@ class Controller:
     # Coord
 
     def add_coord(self, coord: Coord):
-        key = self.menu.insert_coord(coord.row_data())
+        if coord.name in self.model.existing_names():
+            return False
+        key = self.menu.insert_coord(coord)
         self.model.set_coord(key, coord)
+        return True
 
     def get_coord(self, key: str):
         return self.model.get_coord(key)
 
     def set_coord(self, key: str, coord: Coord):
+        if coord.name in self.model.existing_names():
+            return False
         self.model.set_coord(key, coord)
-        self.menu.set_coord(key, coord.row_data())
+        self.menu.set_coord(key, coord)
+        return True
 
     def get_coords(self):
         return self.model.get_coords()

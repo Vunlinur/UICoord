@@ -133,11 +133,11 @@ class MenuView(Frame):
 
     #  Treeview operations
 
-    def insert_coord(self, item: Coord):
-        return self.tree.insert('', 'end', values=item)
+    def insert_coord(self, coord: Coord):
+        return self.tree.insert('', 'end', values=coord.row_data())
 
-    def set_coord(self, key, values):
-        self.tree.item(key, values=values)
+    def set_coord(self, key, coord: Coord):
+        self.tree.item(key, values=coord.row_data())
 
     def delete(self):
         for index in self.tree.selection():
