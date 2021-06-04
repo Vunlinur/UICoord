@@ -20,7 +20,6 @@ class ExportMenu(Toplevel):
         self.preset_pattern = StringVar()
         self.point_pattern = StringVar()
         self.rect_pattern = StringVar()
-        self.rect_pattern.trace("w", lambda name, index, mode, sv=self.rect_pattern: self.update_sample_output())
         self.sample_output = StringVar()
 
         with open('exportpresets.csv') as csv_file:
@@ -56,7 +55,7 @@ class ExportMenu(Toplevel):
         self.entry_point.grid(in_=self, row=1, column=1, sticky=EW, padx=padx, pady=pady)
         self.entry_rect = Entry(self, textvariable=self.rect_pattern)
         self.entry_rect.grid(in_=self, row=2, column=1, sticky=EW, padx=padx, pady=pady)
-        self.entry_output = Entry(self, textvariable=self.sample_output, state=DISABLED)
+        self.entry_output = Entry(self, textvariable=self.sample_output)
         self.entry_output.grid(in_=self, row=3, column=1, sticky=EW, padx=padx, pady=pady)
 
         self.reset_button = Button(self, text="Reset", command=lambda _: self.set_patterns())
@@ -68,8 +67,12 @@ class ExportMenu(Toplevel):
 
         # Binds, callbacks
         self.preset_menu.bind("<<ComboboxSelected>>", lambda _: self.set_patterns())
+        self.entry_output.bind("<Key>", lambda e: "break")
+        self.rect_pattern.trace("w", lambda name, index, mode, sv=self.rect_pattern: self.update_sample_output())
 
         self.get_coords_callback = None
+
+        self.update_sample_output()
 
     def set_patterns(self):
         preset = self.preset_pattern.get()
@@ -77,10 +80,11 @@ class ExportMenu(Toplevel):
         self.point_pattern.set(self.export_presets[preset][1])
 
     def update_sample_output(self):
+        self.entry_output.config(bg=self.parent.cget('bg'))
         try:
             self.sample_output.set(self.rect_pattern.get().format(**self.sample_dict))
         except:
-            pass
+            self.entry_output.config(bg='#ff9898')
 
     def export(self):
         rows = linesep.join(
