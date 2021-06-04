@@ -1,6 +1,8 @@
 from argparse import ArgumentParser
+from os import system, remove
+from threading import Thread
 from tkinter import *
-from tkinter import messagebox
+from tkinter.messagebox import showinfo
 
 from PIL import Image, ImageGrab, UnidentifiedImageError
 
@@ -30,6 +32,7 @@ class Controller:
         self.menu_bar.serialize_path_callback = self.serialize_path
         self.menu_bar.deserialize_path_callback = self.deserialize_path
         self.menu_bar.load_image_from_clipboard_callback = self.load_image_from_clipboard
+        self.menu_bar.load_image_from_adb_screenshot_callback = self.load_image_from_adb_screenshot
         self.menu_bar.export_menu_callback = self.toggle_export_menu
 
         self.workspace.add_coord_callback = self.add_coord
@@ -108,7 +111,7 @@ class Controller:
             self.model.set_image(image)
             self.workspace.load_image(image)
         except AttributeError:
-            messagebox.showinfo(message="Clipboard is Empty.")
+            showinfo(message="Clipboard is Empty.")
 
     def load_image_from_file(self, path):
         try:
@@ -116,7 +119,20 @@ class Controller:
             self.model.set_image(image)
             self.workspace.load_image(image)
         except UnidentifiedImageError:
-            messagebox.showinfo(message="Invalid image file.")
+            showinfo(message="Invalid image file.")
+
+    def load_image_from_adb_screenshot(self):
+        def capture_and_open():
+            temp_file = "temp_coord_screenshot.png"
+            result = system("adb exec-out screencap -p > " + temp_file)
+            if result != 0:
+                showinfo(message="Error communicating with ADB. Please ensure it is added to PATH.")
+                return
+            self.load_image_from_file(temp_file)
+            remove(temp_file)
+
+        thread = Thread(target=capture_and_open)
+        thread.start()
 
     # Project
 
