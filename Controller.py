@@ -90,7 +90,8 @@ class Controller:
         return self.model.get_coord(key)
 
     def set_coord(self, key: str, coord: Coord):
-        if coord.name in self.model.existing_names():
+        if self.model.get_coord(key).name != coord.name \
+                and coord.name in self.model.existing_names():
             return False
         self.model.set_coord(key, coord)
         self.menu.set_coord(key, coord)
