@@ -1,5 +1,5 @@
-CSV|{name},{x1},{y1},{x2},{y2}|{name},{x1},{y1},,
-Json|"{name}": [{x1}, {y1}, {x2}, {y2}],|"{name}": [{x1}, {y1}],
-Python, dict of tuples|"{name}": ({x1}, {y1}, {x2}, {y2}),|"{name}": ({x1}, {y1}),
-Python, class fields|    self.{name} = ({x1}, {y1}, {x2}, {y2})|    self.{name} = ({x1}, {y1}),
-C++, map of vectors|map["{name}"] = std::vector<float>{{{x1}, {y1}, {x2}, {y2}}};|map["{name}"] = std::vector<float>{{{x1}, {y1}}};
+CSV|{name},{x1:.3f},{y1:.3f},{x2:.3f},{y2:.3f}|{name},{x1:.3f},{y1:.3f},,
+Json|"{name}": [{x1:.3f}, {y1:.3f}, {x2:.3f}, {y2:.3f}],|"{name}": [{x1:.3f}, {y1:.3f}],
+Python, dict of tuples|"{name}": ({x1:.3f}, {y1:.3f}, {x2:.3f}, {y2:.3f}),|"{name}": ({x1:.3f}, {y1:.3f}),
+Python, class fields|    self.{name} = ({x1:.3f}, {y1:.3f}, {x2:.3f}, {y2:.3f})|    self.{nefame} = ({x1:.3f}, {y1:.3f})
+C++, map of vectors|map["{name}"] = std::vector<float>{{{x1:.3f}, {y1:.3f}, {x2:.3f}, {y2:.3f}}};|map["{name}"] = std::vector<float>{{{x1:.3f}, {y1:.3f}}};
